@@ -251,31 +251,149 @@ textarea:focus::placeholder { opacity: 0.5; }
 .img-att { max-width: 320px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-line); transition: transform 0.3s; }
 .img-att:hover { transform: scale(1.02); }
  
-.streaming-cursor::after { content: '▎'; display: inline-block; color: var(--accent); margin-left: 2px; animation: cursorBlink 1s infinite; }
- 
-.think-panel { margin-bottom: 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(255,255,255,0.025), rgba(180,160,255,0.025)); border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: all 0.4s var(--transition-smooth); animation: msgAppear 0.5s var(--transition-spring) backwards; backdrop-filter: blur(8px); }
-.think-panel-head { padding: 9px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; transition: background 0.25s; font-size: 12.5px; color: rgba(220, 200, 255, 0.7); font-weight: 500; letter-spacing: 0.2px; }
-.think-panel-head:hover { background: rgba(255,255,255,0.03); color: rgba(220, 200, 255, 0.95); }
-.think-panel-head .think-icon { width: 14px; height: 14px; opacity: 0.8; }
-.think-panel-head .think-label { display: flex; align-items: center; gap: 6px; }
-.think-panel-head .think-status { font-size: 11px; color: rgba(170, 170, 200, 0.55); margin-left: 6px; font-style: italic; font-weight: 400; }
-.think-panel-head .think-chev { margin-left: auto; transition: transform 0.35s var(--transition-spring); opacity: 0.5; }
-.think-panel.open .think-panel-head .think-chev { transform: rotate(180deg); }
-.think-panel-body { max-height: 0; overflow: hidden; transition: max-height 0.45s var(--transition-smooth), padding 0.3s; padding: 0 14px; opacity: 0; }
-.think-panel.open .think-panel-body { max-height: 600px; padding: 4px 14px 14px; opacity: 1; overflow-y: auto; }
-.think-content { font-family: 'JetBrains Mono', 'Menlo', monospace; font-size: 12.5px; line-height: 1.65; color: rgba(200, 195, 215, 0.55); white-space: pre-wrap; word-wrap: break-word; font-style: italic; }
+/* ---------- Streaming caret ---------- */
+.streaming-cursor::after {
+    content: '▍';
+    display: inline-block;
+    color: var(--accent);
+    margin-left: 3px;
+    transform: translateY(1px);
+    animation: caretPulse 1.05s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(196,155,255,0.65);
+}
+@keyframes caretPulse {
+    0%, 100% { opacity: 0.15; transform: translateY(1px) scaleY(0.92); }
+    45%      { opacity: 1;    transform: translateY(1px) scaleY(1); }
+}
+
+/* ---------- Think panel ---------- */
+.think-panel {
+    margin-bottom: 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.025), rgba(180,160,255,0.03));
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    transition: border-color 0.5s var(--transition-smooth),
+                box-shadow 0.5s var(--transition-smooth),
+                background 0.5s var(--transition-smooth);
+    animation: msgAppear 0.5s var(--transition-spring) backwards;
+    backdrop-filter: blur(10px);
+}
+.think-panel-head {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.25s;
+    font-size: 12.5px;
+    color: rgba(220, 200, 255, 0.78);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+.think-panel-head:hover { background: rgba(255,255,255,0.035); color: rgba(230, 210, 255, 1); }
+.think-panel-head .think-icon { width: 15px; height: 15px; opacity: 0.85; flex-shrink: 0; }
+.think-panel-head .think-label { display: inline-flex; align-items: center; gap: 6px; }
+
+/* status as pill, animated state changes */
+.think-panel-head .think-status {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(180,160,255,0.10);
+    color: rgba(220, 200, 255, 0.85);
+    border: 1px solid rgba(180,160,255,0.18);
+    transition: all 0.45s var(--transition-smooth);
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.think-panel-head .think-status.is-thinking {
+    background: rgba(180,160,255,0.14);
+    color: #d8c6ff;
+    border-color: rgba(180,160,255,0.32);
+}
+.think-panel-head .think-status.is-thinking::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #c49bff; box-shadow: 0 0 8px #c49bff;
+    animation: thinkDot 1.2s ease-in-out infinite;
+}
+.think-panel-head .think-status.is-thinked {
+    background: rgba(120, 220, 170, 0.10);
+    color: #a8e6c8;
+    border-color: rgba(120, 220, 170, 0.30);
+}
+.think-panel-head .think-status.is-thinked::before {
+    content: '✓'; font-size: 11px; line-height: 1; color: #a8e6c8;
+}
+.think-panel-head .think-status.is-stopped {
+    background: rgba(255, 120, 120, 0.10);
+    color: #ffb0b0;
+    border-color: rgba(255, 120, 120, 0.28);
+}
+
+.think-panel-head .think-chev {
+    margin-left: auto;
+    transition: transform 0.4s var(--transition-spring);
+    opacity: 0.55;
+}
+.think-panel.open .think-panel-head .think-chev { transform: rotate(180deg); opacity: 0.9; }
+
+.think-panel-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s var(--transition-smooth), padding 0.35s, opacity 0.35s;
+    padding: 0 14px; opacity: 0;
+}
+.think-panel.open .think-panel-body {
+    max-height: 600px; padding: 4px 14px 14px; opacity: 1; overflow-y: auto;
+}
+.think-content {
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 12.5px; line-height: 1.7;
+    color: rgba(205, 200, 220, 0.62);
+    white-space: pre-wrap; word-wrap: break-word; font-style: italic;
+}
 .think-content::selection { background: rgba(196,155,255,0.3); color: #fff; }
-.think-panel.streaming { border-color: rgba(180,160,255,0.22); box-shadow: 0 0 0 1px rgba(180,160,255,0.08), 0 6px 22px rgba(180,160,255,0.06); }
-.think-panel.streaming .think-panel-head { background: linear-gradient(90deg, rgba(180,160,255,0.04), transparent 50%, rgba(180,160,255,0.04)); background-size: 200% 100%; animation: thinkSlide 2.4s linear infinite; }
+
+/* live state: glowing border + animated head sheen + pulsing icon */
+.think-panel.streaming {
+    border-color: rgba(180,160,255,0.32);
+    box-shadow: 0 0 0 1px rgba(180,160,255,0.10),
+                0 8px 28px rgba(180,160,255,0.10);
+}
+.think-panel.streaming .think-panel-head {
+    background: linear-gradient(90deg,
+                rgba(180,160,255,0.06), transparent 50%, rgba(180,160,255,0.06));
+    background-size: 200% 100%;
+    animation: thinkSlide 2.4s linear infinite;
+}
 .think-panel.streaming .think-icon { animation: thinkPulse 1.6s ease-in-out infinite; }
+
+.think-panel.soft {
+    border-color: rgba(120, 220, 170, 0.18);
+    box-shadow: none;
+}
+
 @keyframes thinkSlide { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @keyframes thinkPulse { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
-@keyframes cursorBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
-.typing-dots { display: flex; gap: 5px; padding: 8px 0; align-items: center; }
-.typing-dots span { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: typingBounce 1.4s infinite; box-shadow: 0 0 8px rgba(196, 155, 255, 0.5); }
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-10px); opacity: 1; } }
+@keyframes thinkDot   { 0%,100% { transform: scale(0.8); opacity: 0.55; }
+                        50%     { transform: scale(1.15); opacity: 1; } }
+.typing-dots { display: inline-flex; gap: 5px; padding: 6px 2px; }
+.typing-dots span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: linear-gradient(135deg, #c49bff, #7c6aff);
+    box-shadow: 0 0 8px rgba(196,155,255,0.45);
+    animation: typingBounce 1.15s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.30s; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: translateY(0) scale(0.85); opacity: 0.55; }
+    40%           { transform: translateY(-5px) scale(1);  opacity: 1; }
+}
+
  
 .code-copy-btn { position: absolute; top: 10px; right: 10px; padding: 5px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: var(--text-secondary); font-size: 11px; cursor: pointer; opacity: 0; transition: all 0.3s var(--transition-spring); font-family: inherit; }
 .msg-text-content pre:hover .code-copy-btn { opacity: 1; }
@@ -1535,28 +1653,34 @@ async function sendToAI() {
                     const j = JSON.parse(t);
                     const delta = j.choices && j.choices[0] && j.choices[0].delta;
                     if (!delta) continue;
-                    if (delta.reasoning) {
-                        reasonAccum += delta.reasoning;
-                        if (!thinkPanel) {
-                            thinkPanel = buildThinkPanel('', true, true);
-                            streamNode.parentElement.insertBefore(thinkPanel, streamNode);
-                        }
-                        thinkPanel._content.textContent = reasonAccum;
-                        goBottom();
+                if (delta.reasoning) {
+                    reasonAccum += delta.reasoning;
+                    if (!thinkPanel) {
+                        thinkPanel = buildThinkPanel('', true, true);
+                        streamNode.parentElement.insertBefore(thinkPanel, streamNode);
                     }
-                    if (delta.content) {
-                        accum += delta.content;
-                        streamNode.innerHTML = marked.parse(accum);
-                        goBottom();
+                    thinkPanel._content.textContent = reasonAccum;
+                    goBottom();
+                }
+                if (delta.content) {
+                    // First content token after reasoning -> flip "thinking" to "thinked"
+                    if (thinkPanel && !thinkPanel._flipped) {
+                        thinkPanel._flipped = true;
+                        thinkPanel.setStatus('thinked');
+                        // gently collapse the reasoning panel as the answer begins
+                        thinkPanel.classList.remove('open');
                     }
+                    accum += delta.content;
+                    streamNode.innerHTML = marked.parse(accum);
+                    goBottom();
+                }
+
                 } catch (e) {}
             }
         }
         streamNode.classList.remove('streaming-cursor');
         if (thinkPanel) {
-            thinkPanel.classList.remove('streaming');
-            const st = thinkPanel.querySelector('.think-status');
-            if (st) st.textContent = 'reasoned';
+            thinkPanel.setStatus('thinked'); // safety: in case no content arrived
             thinkPanel.classList.remove('open');
         }
         if (accum.trim() || reasonAccum.trim()) {
@@ -1571,7 +1695,7 @@ async function sendToAI() {
         if (settings.sound) playChime();
     } catch (EE) {
         streamNode.classList.remove('streaming-cursor');
-        if (thinkPanel) { thinkPanel.classList.remove('streaming'); const st = thinkPanel.querySelector('.think-status'); if (st) st.textContent = 'stopped'; }
+        if (thinkPanel) thinkPanel.setStatus('stopped');
         if (EE.name === 'AbortError') {
             if (accum.trim() || reasonAccum.trim()) {
                 const entry = { role: "assistant", content: accum };
@@ -1655,7 +1779,9 @@ function buildThinkPanel(initialText, openByDefault, isStreaming) {
     head.innerHTML =
         '<svg class="think-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14a4 4 0 1 1 6 0c-.5.5-1 1-1 2v1h-4v-1c0-1-.5-1.5-1-2z"/></svg>' +
         '<span class="think-label">Thinking</span>' +
-        '<span class="think-status">' + (isStreaming ? 'reasoning…' : 'reasoned') + '</span>' +
+        '<span class="think-status ' + (isStreaming ? 'is-thinking' : 'is-thinked') + '">' +
+            (isStreaming ? 'thinking' : 'thinked') +
+        '</span>' +
         '<svg class="think-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
     head.onclick = () => p.classList.toggle('open');
     const body = document.createElement('div');
@@ -1667,8 +1793,29 @@ function buildThinkPanel(initialText, openByDefault, isStreaming) {
     p.append(head, body);
     p._content = content;
     p._head = head;
+
+    // Helper: smoothly switch status pill
+    p.setStatus = function(state /* 'thinking' | 'thinked' | 'stopped' */) {
+        const st = head.querySelector('.think-status');
+        if (!st) return;
+        st.classList.remove('is-thinking', 'is-thinked', 'is-stopped');
+        st.classList.add('is-' + state);
+        // tiny fade swap
+        st.style.transition = 'opacity 0.18s ease';
+        st.style.opacity = '0';
+        setTimeout(() => {
+            st.childNodes.forEach(n => { if (n.nodeType === 3) n.remove(); });
+            st.appendChild(document.createTextNode(state));
+            st.style.opacity = '1';
+        }, 160);
+        if (state === 'thinking') p.classList.add('streaming');
+        else p.classList.remove('streaming');
+        if (state === 'thinked')  p.classList.add('soft');
+    };
     return p;
 }
+
+
 function createABox(str, reasoning) {
     let mx = createLoadNode();
     let panel = mx._thinkPanel;
@@ -1678,8 +1825,8 @@ function createABox(str, reasoning) {
             mx.parentElement.insertBefore(panel, mx);
         } else {
             panel._content.textContent = reasoning;
-            panel.classList.remove('streaming', 'open');
-            const st = panel.querySelector('.think-status'); if (st) st.textContent = 'reasoned';
+            panel.classList.remove('open');
+            panel.setStatus('thinked');
         }
     } else if (panel) {
         panel.remove();
